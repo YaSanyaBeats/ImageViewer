@@ -45,7 +45,7 @@
 			<Carousel Items="{Binding SelectedImages}" Width="700" Height="400" Name="carousel">
 				<Carousel.ItemTemplate>
 					<DataTemplate>
-						<Image Source="{Binding Image}"></Image>
+						<Image ToolTip.Tip="{Binding StrPath}" Source="{Binding Image}"></Image>
 					</DataTemplate>
 				</Carousel.ItemTemplate>
 			</Carousel>

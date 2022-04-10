@@ -15,7 +15,7 @@ namespace ImageViewer.ViewModels
     {
         public ObservableCollection<Node> Subfolders { get; set; }
         public string Name { get; }
-        public string StrPath { get; }
+        public string StrPath { get; set; }
         public Bitmap Image { get; set; }
         public Node Parent { get; set; }
         public Node(string strPath, bool isImage = false, Node parent = null)
