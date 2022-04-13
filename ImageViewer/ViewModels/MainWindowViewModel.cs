@@ -8,27 +8,11 @@ using ReactiveUI;
 using System.Reactive;
 using Avalonia.Media.Imaging;
 using System.IO;
+using ImageViewer.Models;
 
 namespace ImageViewer.ViewModels
 {
-    public class Node
-    {
-        public ObservableCollection<Node> Subfolders { get; set; }
-        public string Name { get; }
-        public string StrPath { get; set; }
-        public Bitmap Image { get; set; }
-        public Node Parent { get; set; }
-        public Node(string strPath, bool isImage = false, Node parent = null)
-        {
-            StrPath = strPath;
-            Name = Path.GetFileName(strPath);
-            if (isImage)
-            {
-                Image = new Bitmap(strPath);
-                Parent = parent;
-            }
-        }
-    }
+    
     public class MainWindowViewModel : ViewModelBase
     {
         public ObservableCollection<Node> Folders { get; }
@@ -41,75 +25,23 @@ namespace ImageViewer.ViewModels
                 this.RaiseAndSetIfChanged(ref selectedImages, value);
             }
         }
+        List<string> allDrivesNames;
         public MainWindowViewModel()
         {
             string root = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
 
             Folders = new ObservableCollection<Node>();
             SelectedImages = new ObservableCollection<Node>();
-            if (withImages(root))
+
+            allDrivesNames = new List<string>();
+            DriveInfo[] allDrives = DriveInfo.GetDrives();
+
+            foreach (DriveInfo drive in allDrives)
             {
-                Node rootNode = new Node(root);
-                rootNode.Subfolders = GetSubfolders(root);
-                GetImages(root, rootNode);
+                allDrivesNames.Add(drive.Name);
+                Node rootNode = new Node(drive.Name);
                 Folders.Add(rootNode);
             }
-        }
-        public ObservableCollection<Node> GetSubfolders(string strPath)
-        {
-            ObservableCollection<Node> subfolders = new ObservableCollection<Node>();
-            string[] subdirs = Directory.GetDirectories(strPath, "*", SearchOption.TopDirectoryOnly);
-
-            foreach (string dir in subdirs)
-            {
-                if (withImages(dir))
-                {
-                    Node currentNode = new Node(dir);
-                    currentNode.Subfolders = new ObservableCollection<Node>();
-                    currentNode.Subfolders = GetSubfolders(dir);
-                    GetImages(dir, currentNode);
-                    subfolders.Add(currentNode);
-                }
-            }
-
-            return subfolders;
-        }
-        public void GetImages(string imagePath, Node node)
-        {
-            List<string> images = new List<string>();
-            images.AddRange(Directory.GetFiles(imagePath, "*.*", SearchOption.TopDirectoryOnly)
-                             .Where(f => f.EndsWith(".jpg") || f.EndsWith(".png")).ToArray());
-            if (images.Count > 0)
-            {
-                if(node.Subfolders == null)
-                {
-                    node.Subfolders = new ObservableCollection<Node>();
-                }
-                foreach (string image in images)
-                {
-                    Node imageNode = new Node(image, true, node);
-                    node.Subfolders.Add(imageNode);
-                }
-            }
-        }
-        public bool withImages(string srcPath)
-        {
-            //Да это долго, да мне стыдно(
-            List<string> images = new List<string>();
-            try
-            {
-                images.AddRange(Directory.GetFiles(srcPath, "*.*", SearchOption.AllDirectories)
-                             .Where(f => f.EndsWith(".jpg") || f.EndsWith(".png")).ToArray());
-            }
-            catch (Exception ex)
-            {
-
-            }
-            if (images.Count > 0)
-            {
-                return true;
-            }
-            return false;
         }
         public void ChangeSelectedImages(object obj)
         {
@@ -126,9 +58,11 @@ namespace ImageViewer.ViewModels
                     }
                 }
                 EnableNext = count != 1;
+
+                SelectedImages.Add(thisNode);
                 foreach (var imageNode in thisNode.Parent.Subfolders)
                 {
-                    if (imageNode.Image != null)
+                    if (imageNode.Image != null && imageNode != thisNode)
                     {
                         SelectedImages.Add(imageNode);
                     }
@@ -136,7 +70,6 @@ namespace ImageViewer.ViewModels
             }
             
         }
-        
         private bool enableNext = false;
         public bool EnableNext
         {

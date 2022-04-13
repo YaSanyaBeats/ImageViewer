@@ -33,7 +33,9 @@
 			  VerticalAlignment="Top">
 				<TreeView.ItemTemplate>
 					<TreeDataTemplate ItemsSource="{Binding Subfolders}">
-						<TextBlock Text="{Binding Name}"/>
+						<ContentControl TemplateApplied="ClickForLoadNodes">
+							<TextBlock Text="{Binding Name}"/>
+						</ContentControl>
 					</TreeDataTemplate>
 				</TreeView.ItemTemplate>
 			</TreeView>

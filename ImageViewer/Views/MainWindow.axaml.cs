@@ -1,6 +1,11 @@
 using Avalonia.Controls;
 using ImageViewer.ViewModels;
+using ImageViewer.Models;
 using System.Collections.ObjectModel;
+using Avalonia.Controls.Primitives;
+using System.Linq;
+using System.IO;
+
 
 namespace ImageViewer.Views
 {
@@ -43,6 +48,12 @@ namespace ImageViewer.Views
                     context.EnableNext = true;
                 }
             };
+        }
+        private void ClickForLoadNodes(object sender, TemplateAppliedEventArgs e)
+        {
+            ContentControl treeViewItem = sender as ContentControl;
+            Node selectedNode = treeViewItem.DataContext as Node;
+            selectedNode.LoadSubfolders();
         }
         public void OnTreeViewSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
